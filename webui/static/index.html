@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoUnipus Web UI</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>AutoUnipus <span class="ver">v2 webui</span></h1>
+  <div class="status" id="status">
+    <span class="dot" id="status-dot"></span>
+    <span id="status-text">加载中...</span>
+  </div>
+</header>
+
+<main>
+  <!-- ========== 配置 ========== -->
+  <section class="card">
+    <h2>配置</h2>
+    <form id="cfg-form" autocomplete="off">
+      <div class="row">
+        <label>账号
+          <input name="username" type="text" required>
+        </label>
+        <label>密码
+          <input name="password" type="password" required>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>浏览器
+          <select name="Driver">
+            <option value="Edge">Edge</option>
+            <option value="Chrome">Chrome</option>
+          </select>
+        </label>
+        <label>模式
+          <select name="Automode">
+            <option value="true">自动模式 (Automode)</option>
+            <option value="false">辅助模式 (Assistmode)</option>
+          </select>
+        </label>
+      </div>
+
+      <label>课程链接 (一行一条,自动模式必填)
+        <textarea name="class_url" rows="3" placeholder="https://u.unipus.cn/user/student/mycourse/courseCatalog?..."></textarea>
+      </label>
+
+      <fieldset>
+        <legend>启用题型 handler</legend>
+        <div id="handlers-list" class="checks"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>测试选项</legend>
+        <label class="check">
+          <input type="checkbox" name="dry_run">
+          <span>试运行(填答案但不点提交/下一页)</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" name="harvest_first_pass">
+          <span>第一遍收割模式(没拿到答案也强行提交,从 review 扒正确答案进缓存。第二遍跑就 100%)</span>
+        </label>
+        <label>阅读型页面停留时长 (秒)
+          <input type="number" name="reading_duration_sec" min="3" max="60" step="1"
+                 placeholder="8" style="max-width:120px">
+          <small style="color:var(--muted);">没有任何 input 的纯阅读页(Preview / 课文)只停留这么久,不调 AI 不提交</small>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>缓存</legend>
+        <label class="check">
+          <input type="checkbox" name="cache.enabled">
+          <span>启用 SQLite 答案缓存</span>
+        </label>
+        <label>缓存路径
+          <input type="text" name="cache.path" placeholder="data/answers.db">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>AI 兜底(预留)</legend>
+        <label class="check">
+          <input type="checkbox" name="ai.enabled">
+          <span>启用 AI 兜底(需要补充 prompt 实现)</span>
+        </label>
+        <div class="row">
+          <label>Base URL
+            <input type="text" name="ai.base_url" placeholder="https://api.deepseek.com/v1">
+          </label>
+          <label>Model
+            <input type="text" name="ai.model" placeholder="deepseek-chat">
+          </label>
+        </div>
+        <label>API Key
+          <input type="password" name="ai.api_key" placeholder="sk-...">
+        </label>
+        <label>Fallback 模型(每行一个,主模型空响应时按顺序尝试)
+          <textarea name="ai.fallback_models" rows="3"
+                    placeholder="gpt-5.4-openai-compact&#10;gpt-5.3-codex-spark"
+                    style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;"></textarea>
+          <small style="color:var(--muted);">中转/上游对特定题面偶尔会"软拒答"返回 0 token,此时自动换下一个模型重试。留空则不做模型 fallback。</small>
+        </label>
+        <div class="actions">
+          <button type="button" id="btn-test-ai" class="ghost">测试连通性</button>
+          <span id="ai-test-msg" class="msg"></span>
+        </div>
+        <pre id="ai-test-detail" class="cache-info" style="margin-top:8px; display:none; max-height:240px; overflow:auto; white-space:pre-wrap; word-break:break-all;"></pre>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit">保存配置</button>
+        <span id="cfg-msg" class="msg"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- ========== 运行 ========== -->
+  <section class="card">
+    <h2>运行</h2>
+    <div class="row">
+      <button id="btn-start">启动</button>
+      <button id="btn-stop" class="ghost">停止</button>
+      <button id="btn-trigger" class="ghost" title="辅助模式下点这个触发一次扫描">扫描当前页 (assist)</button>
+      <span id="run-msg" class="msg"></span>
+    </div>
+    <div class="logs-toolbar">
+      <strong>日志</strong>
+      <span class="spacer"></span>
+      <label class="check inline">
+        <input type="checkbox" id="autoscroll" checked>
+        <span>自动滚动</span>
+      </label>
+      <button id="btn-clear-logs" class="ghost small">清空</button>
+    </div>
+    <pre id="logs" class="logs"></pre>
+  </section>
+
+  <!-- ========== 缓存 ========== -->
+  <section class="card">
+    <h2>缓存</h2>
+    <div id="cache-info" class="cache-info">读取中...</div>
+    <div class="actions">
+      <button id="btn-refresh-cache" class="ghost">刷新</button>
+      <button id="btn-clear-cache" class="danger">清空缓存</button>
+    </div>
+  </section>
+
+  <!-- ========== 手动答案库 ========== -->
+  <section class="card">
+    <h2>手动答案库</h2>
+    <p class="msg">三类 key:<code>exact_by_qid</code>(优先) / <code>exact_by_task</code> / <code>fuzzy_by_title</code>(标题片段)。
+       每跑完一题日志里会打印 <code>task=... title=...</code>,直接复制粘贴到下面对应的位置即可。
+       保存后无需重启,下一道题会自动重读。</p>
+
+    <fieldset>
+      <legend>快速录入(推荐)</legend>
+      <div class="row">
+        <label>key 类型
+          <select id="quick-kind">
+            <option value="task">exact_by_task(URL 段,如 u2g68)</option>
+            <option value="qid">exact_by_qid(summary 接口里的 32 位 hex)</option>
+            <option value="title">fuzzy_by_title(标题片段,大小写无关)</option>
+          </select>
+        </label>
+        <label>key
+          <input type="text" id="quick-key" placeholder="u2g68 或 1-2 Text A Word building">
+        </label>
+      </div>
+      <label>答案(一行一个,顺序对应题目顺序)
+        <textarea id="quick-answers" rows="6" placeholder="successful&#10;cooperative&#10;peaceful"></textarea>
+      </label>
+      <div class="actions">
+        <button id="btn-quick-add">添加到答案库</button>
+        <span id="quick-msg" class="msg"></span>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>批量导入(从 OCR/Zhihu 文本一次粘贴多块)</legend>
+      <p class="msg">粘贴格式:用<strong>空行</strong>分块,每块第一行是 key(标题/task_id/qid),后面每行一个答案,
+         可带 <code>1.</code> / <code>1)</code> / <code>①</code> 等编号前缀。</p>
+      <textarea id="bulk-raw" rows="12" spellcheck="false"
+        placeholder="1-2 Text A Words in use&#10;1. successful&#10;2. cooperative&#10;3. peaceful&#10;&#10;1-2 Text A Banked cloze&#10;1. speculate&#10;2. prospect&#10;..."
+        style="font-family: 'SF Mono', Menlo, Consolas, monospace; font-size:12px; width:100%;
+               background:var(--panel-2); color:var(--text); border:1px solid var(--border);
+               border-radius:6px; padding:10px;"></textarea>
+      <div class="actions">
+        <select id="bulk-kind">
+          <option value="title">导入到 fuzzy_by_title(标题模糊)</option>
+          <option value="task">导入到 exact_by_task(URL 段精确)</option>
+          <option value="qid">导入到 exact_by_qid(qid 精确)</option>
+        </select>
+        <button id="btn-bulk-preview" class="ghost">先预览</button>
+        <button id="btn-bulk-import">直接导入</button>
+        <span id="bulk-msg" class="msg"></span>
+      </div>
+      <div id="bulk-preview" class="cache-info" style="margin-top:8px; display:none; max-height:200px; overflow:auto;"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>从缓存补回(SQLite → manual_answers.json)</legend>
+      <p class="msg">把 <code>data/answers.db</code> 里所有题的答案同步到 <code>exact_by_task</code>,
+         给跨账号 / 跨账号库使用。<strong>只补缺,不会覆盖</strong>已经手填的精修答案。</p>
+      <div class="actions">
+        <button id="btn-sync-cache">从缓存补回答案库</button>
+        <span id="sync-cache-msg" class="msg"></span>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>清掉某题的脏数据(按 task_id)</legend>
+      <p class="msg">如果某题缓存的答案是错的(典型:AI 把主观题答成单词了,被永久缓存),
+         在这里输入 task_id(日志里 <code>task=...</code> 那段),
+         一次性删 SQLite 缓存 + <code>manual_answers.json</code> 中对应的 <code>exact_by_task</code>。
+         下次跑同一题会重新询问 AI 或人工答案库。</p>
+      <div class="actions">
+        <input type="text" id="forget-task-id" placeholder="u2g68" style="flex:1">
+        <button id="btn-forget-task" class="ghost">删除该 task 的缓存+答案库</button>
+        <span id="forget-task-msg" class="msg"></span>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>高级:直接编辑 JSON</legend>
+      <textarea id="manual-json" rows="14" spellcheck="false"
+        style="font-family: 'SF Mono', Menlo, Consolas, monospace; font-size:12px; width:100%;
+               background:var(--panel-2); color:var(--text); border:1px solid var(--border);
+               border-radius:6px; padding:10px;"></textarea>
+      <div class="actions">
+        <button id="btn-save-manual">保存答案库</button>
+        <button id="btn-reload-manual" class="ghost">从文件重读</button>
+        <span id="manual-msg" class="msg"></span>
+      </div>
+    </fieldset>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

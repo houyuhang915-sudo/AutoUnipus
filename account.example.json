@@ -1,0 +1,30 @@
+{
+  "username": "",
+  "password": "",
+  "Automode": true,
+  "Driver": "Edge",
+  "class_url": [
+    "https://u.unipus.cn/user/student/mycourse/courseCatalog?courseId=...&school_id=...&eccId=...&classId=...&coursetype=0"
+  ],
+  "handlers": [
+    "single-choice",
+    "multi-choice",
+    "word-blank",
+    "blank",
+    "translation"
+  ],
+  "dry_run": false,
+  "harvest_first_pass": false,
+  "reading_duration_sec": 8,
+  "ai": {
+    "enabled": false,
+    "base_url": "",
+    "api_key": "",
+    "model": "",
+    "timeout": 30
+  },
+  "cache": {
+    "enabled": true,
+    "path": "data/answers.db"
+  }
+}

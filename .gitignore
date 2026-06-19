@@ -1,0 +1,24 @@
+# 旧规则
+./pre_test/*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 答案缓存(可能含个人课程数据)
+data/
+
+# 错误日志
+log.txt
+
+# 本地敏感配置(包含账号密码 + AI key,务必不要推到公开仓库)
+account.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store

@@ -1,0 +1,7 @@
+# AutoUnipus runtime dependencies
+playwright>=1.40.0
+pycryptodome>=3.19.0
+requests>=2.31.0
+
+# Web UI
+flask>=3.0.0
