@@ -5,6 +5,11 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 .venv/
 venv/
 
@@ -13,9 +18,14 @@ data/
 
 # 错误日志
 log.txt
+*.log
+logs/
 
 # 本地敏感配置(包含账号密码 + AI key,务必不要推到公开仓库)
 account.json
+account.local.json
+.env
+.env.*
 
 # IDE
 .idea/

@@ -8,6 +8,13 @@
   // ---------- 配置加载/保存 ----------
 
   let allHandlers = [];
+  const handlerLabels = {
+    "single-choice": "单选题",
+    "multi-choice": "多选题",
+    "word-blank": "选词填空",
+    "blank": "填空题",
+    "translation": "翻译 / 简答",
+  };
 
   async function loadConfig() {
     const r = await fetch("/api/config");
@@ -32,7 +39,7 @@
       label.className = "check";
       label.innerHTML = `
         <input type="checkbox" data-handler="${name}" id="${id}" ${enabledSet.has(name) ? "checked" : ""}>
-        <span>${name}</span>
+        <span>${handlerLabels[name] || name}</span>
       `;
       wrap.appendChild(label);
     }
@@ -136,7 +143,7 @@
     });
     const data = await r.json().catch(() => ({}));
     if (r.ok) {
-      msg("run-msg", `已启动 (${mode})`, "ok");
+      msg("run-msg", `已启动 (${mode === "auto" ? "自动模式" : "辅助模式"})`, "ok");
     } else {
       msg("run-msg", data.error || `HTTP ${r.status}`, "err");
     }

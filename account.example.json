@@ -21,6 +21,7 @@
     "base_url": "",
     "api_key": "",
     "model": "",
+    "fallback_models": [],
     "timeout": 30
   },
   "cache": {

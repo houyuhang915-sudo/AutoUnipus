@@ -4,6 +4,78 @@
 > 走 AI 兜底答题 + 人工答案库精确命中 + 提交后从 review 反扒标答自动入库。
 > 自带 Web UI,可视化配置 / 实时日志 / 答案库管理。
 
+## 项目说明
+
+AutoUnipus 是一个面向老版 U校园页面的本地浏览器自动化研究项目。它通过 Playwright 控制本机浏览器,
+在本地完成登录、页面识别、题型分发、日志展示、缓存管理和答案库维护。项目不会内置任何账号、密码、
+课程数据、答案数据或第三方 API key。
+
+适合用来学习:
+
+- Playwright 浏览器自动化流程编排
+- Flask + 原生前端构建本地 Web UI
+- SQLite 缓存与本地 JSON 答案库管理
+- OpenAI 兼容接口的多模型 fallback 调用方式
+- 复杂页面 DOM 识别、弹窗处理和任务汇总
+
+> 重要:本项目仅供学习、研究和个人自动化测试参考。请遵守所在学校、课程平台和相关服务条款,
+> 不要用于考试、作业、刷课、绕过教学要求或其他不当场景。
+
+## 功能概览
+
+- Web UI 配置账号、课程链接、运行模式、题型开关、AI 参数和缓存路径
+- 自动模式:按课程目录枚举必修入口并依次处理
+- 辅助模式:手动打开页面后,按需触发当前页扫描
+- 题型 handler:单选、多选、普通填空、选词填空、翻译 / 简答
+- 答案来源链:SQLite 缓存 → 手动答案库 → AI 兜底
+- review 反扒:提交后解析标准答案,通过严格条数校验后写入本地缓存
+- SSE 实时日志、缓存统计、答案库快速录入 / 批量导入 / 清理脏数据
+
+## 快速开始
+
+```bash
+git clone https://github.com/houyuhang915-sudo/AutoUnipus.git
+cd AutoUnipus
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+playwright install
+
+cp account.example.json account.json
+python3 webui_launcher.py
+```
+
+启动后访问:
+
+```text
+http://127.0.0.1:5500/
+```
+
+Windows 用户可将 `python3` 替换为 `python`,虚拟环境激活命令通常为:
+
+```powershell
+.\.venv\Scripts\activate
+```
+
+## 隐私与本地数据
+
+以下文件只应保存在本地,不应提交到公开仓库:
+
+- `account.json`:真实账号、密码、课程链接、AI key
+- `data/`:SQLite 答案缓存、手动答案库、调试 dump
+- `log.txt` / `*.log`:运行错误日志
+- `.env`:本地环境变量
+
+仓库已通过 `.gitignore` 忽略这些路径。开源前可以用下面的命令再次确认:
+
+```bash
+git ls-files account.json data .env log.txt
+git log --all -- account.json data .env log.txt
+```
+
+如果这些命令输出了历史提交,说明敏感信息曾经进入 Git 历史,需要先清理历史再公开。
+
 ## 工作原理
 
 ```
@@ -84,10 +156,10 @@ cp account.example.json account.json
 ### Web UI(推荐)
 
 ```bash
-python webui_launcher.py                    # 默认 5500,自动开浏览器
-python webui_launcher.py --port 5500
-python webui_launcher.py --no-browser
-python AutoUnipus.py --webui                # 等价写法
+python3 webui_launcher.py                    # 默认 5500,自动开浏览器
+python3 webui_launcher.py --port 5500
+python3 webui_launcher.py --no-browser
+python3 AutoUnipus.py --webui                # 等价写法
 ```
 
 > macOS 上的 5000 端口被 AirPlay Receiver 占用,默认改成了 5500。
@@ -108,7 +180,7 @@ WebUI 能做的事:
 ### CLI
 
 ```bash
-python AutoUnipus.py
+python3 AutoUnipus.py
 ```
 
 直接读 `account.json` 跑对应模式。
@@ -299,7 +371,11 @@ AutoUnipus/
 - [yuanarcsin/unipus_auto](https://github.com/yuanarcsin/unipus_auto) — 老版本逆向方案(已实测在我的部署上不通,代码保留作参考)
 - [DMCSWCG/UnipusGetAnswer](https://github.com/DMCSWCG/UnipusGetAnswer) — 暴力反推思路(同上)
 
-## 声明
+## 免责声明
 
-仅供学习与研究使用,请勿用于任何非法用途。所有账号密码 / API key 仅在本机使用,
-代码不会向第三方上报任何配置或答题数据。
+本项目仅供学习、研究和个人自动化测试参考,不鼓励也不支持任何违反学校规定、课程平台规则、
+考试 / 作业要求或服务条款的使用方式。使用者应自行承担运行本项目带来的账号、课程记录、
+平台风控、数据准确性和合规风险。
+
+项目不会主动收集、上传或共享账号密码、API key、课程链接、答案缓存或日志数据。所有运行数据默认保存在本机,
+请不要把 `account.json`、`data/`、日志文件或任何包含个人信息的截图提交到公开仓库。

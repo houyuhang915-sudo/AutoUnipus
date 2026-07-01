@@ -38,8 +38,8 @@
         </label>
         <label>模式
           <select name="Automode">
-            <option value="true">自动模式 (Automode)</option>
-            <option value="false">辅助模式 (Assistmode)</option>
+            <option value="true">自动模式</option>
+            <option value="false">辅助模式</option>
           </select>
         </label>
       </div>
@@ -49,25 +49,34 @@
       </label>
 
       <fieldset>
-        <legend>启用题型 handler</legend>
+        <legend>启用题型</legend>
         <div id="handlers-list" class="checks"></div>
       </fieldset>
 
       <fieldset>
         <legend>测试选项</legend>
-        <label class="check">
-          <input type="checkbox" name="dry_run">
-          <span>试运行(填答案但不点提交/下一页)</span>
-        </label>
-        <label class="check">
-          <input type="checkbox" name="harvest_first_pass">
-          <span>第一遍收割模式(没拿到答案也强行提交,从 review 扒正确答案进缓存。第二遍跑就 100%)</span>
-        </label>
-        <label>阅读型页面停留时长 (秒)
-          <input type="number" name="reading_duration_sec" min="3" max="60" step="1"
-                 placeholder="8" style="max-width:120px">
-          <small style="color:var(--muted);">没有任何 input 的纯阅读页(Preview / 课文)只停留这么久,不调 AI 不提交</small>
-        </label>
+        <div class="option-grid">
+          <label class="check option-card">
+            <input type="checkbox" name="dry_run">
+            <span>
+              <strong>试运行</strong>
+              <small>填答案但不点提交 / 下一页，方便先检查。</small>
+            </span>
+          </label>
+          <label class="check option-card">
+            <input type="checkbox" name="harvest_first_pass">
+            <span>
+              <strong>第一遍收割模式</strong>
+              <small>没拿到答案也提交，从 review 扒正确答案进缓存。</small>
+            </span>
+          </label>
+          <label class="field-card">
+            <span>阅读型页面停留时长（秒）</span>
+            <input type="number" name="reading_duration_sec" min="3" max="60" step="1"
+                   placeholder="8">
+            <small>纯阅读页只停留这么久，不调用 AI，不提交。</small>
+          </label>
+        </div>
       </fieldset>
 
       <fieldset>
@@ -124,7 +133,7 @@
     <div class="row">
       <button id="btn-start">启动</button>
       <button id="btn-stop" class="ghost">停止</button>
-      <button id="btn-trigger" class="ghost" title="辅助模式下点这个触发一次扫描">扫描当前页 (assist)</button>
+      <button id="btn-trigger" class="ghost" title="辅助模式下点这个触发一次扫描">扫描当前页</button>
       <span id="run-msg" class="msg"></span>
     </div>
     <div class="logs-toolbar">
