@@ -1,4 +1,4 @@
-# AutoUnipus
+# AutoUnipus-plus
 
 > 老版 U校园(unipus)新视野大学英语 自动答题工具。Python + Playwright,
 > 走 AI 兜底答题 + 人工答案库精确命中 + 提交后从 review 反扒标答自动入库。
