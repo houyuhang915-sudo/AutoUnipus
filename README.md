@@ -4,6 +4,9 @@
 > 走 AI 兜底答题 + 人工答案库精确命中 + 提交后从 review 反扒标答自动入库。
 > 自带 Web UI,可视化配置 / 实时日志 / 答案库管理。
 
+**关键词**: U校园、U 校园、Unipus、Uschool、U校园自动化、U校园脚本、新视野大学英语、外研社 U校园、
+Playwright 自动化、Python WebUI、SQLite 答案缓存。
+
 ## 项目说明
 
 AutoUnipus 是一个面向老版 U校园页面的本地浏览器自动化研究项目。它通过 Playwright 控制本机浏览器,
